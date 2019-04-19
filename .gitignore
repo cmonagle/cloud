@@ -1,3 +1,2 @@
-secrets.env
-./certs
-./data
+.env
+wordpress.env

@@ -1,0 +1,11 @@
+{$CLOUD_URL} {
+  proxy / nextcloud-app:80 {
+      transparent
+  }
+}
+
+{$BLOG_URL} {
+  proxy / wordpress-app:80 {
+    transparent
+  }
+}

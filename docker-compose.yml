@@ -1,0 +1,69 @@
+version: '3'
+
+services:
+  nextcloud-app:
+    image: nextcloud:apache
+    restart: always
+    ports:
+      - "9000:80"
+    volumes:
+      - nc-app:/var/www/html
+    depends_on:
+      - nextcloud-db
+    environment:
+      - MYSQL_HOST=nextcloud-db
+    env_file:
+      - .env
+
+  nextcloud-db:
+    image: mariadb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: always
+    volumes:
+      - nc-db:/var/lib/mysql
+    env_file:
+      - .env
+
+  wordpress-db:
+    image: mariadb
+    volumes:
+      - wp-db:/var/lib/mysql
+    restart: always
+    env_file:
+      - wordpress.env
+
+  wordpress-app:
+    depends_on:
+      - wordpress-db
+    image: wordpress:latest
+    ports:
+      - "8000:80"
+    restart: always
+    volumes:
+      - wp-app:/var/www/html/
+    environment:
+      WORDPRESS_DB_HOST: wordpress-db
+    env_file:
+      - wordpress.env
+
+  caddy:
+    image: "abiosoft/caddy:latest"
+    volumes:
+      - certs:/root/.caddy
+      - ./Caddyfile:/etc/Caddyfile
+    ports:
+      - "2015:2015"
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - nextcloud-app
+      - wordpress-app
+    env_file:
+      - .env
+
+volumes:
+  nc-app:
+  nc-db:
+  wp-db:
+  wp-app:
+  certs:
